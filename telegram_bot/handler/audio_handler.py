@@ -16,7 +16,8 @@ async def search_music(query):
     ydl_opts = {
         'format': 'bestaudio/best',
         'quiet': True,
-        'noplaylist': True
+        'noplaylist': True,
+        'cookiefile': '/root/cookies.txt'
     }
 
     results = []
@@ -52,7 +53,8 @@ async def download_music(music_id):
         'format': 'bestaudio/best',
         'quiet': True,
         'noplaylist': True,
-        'outtmpl': 'music/%(title)s.mp3'
+        'outtmpl': 'music/%(title)s.mp3',
+        'cookiefile': '/root/cookies.txt'
     }
     result = None
     try:
