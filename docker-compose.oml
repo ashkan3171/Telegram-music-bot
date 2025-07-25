@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  telegram-music-bot:
+    build: .
+    container_name: telegram-music-bot
+    env_file:
+      - .env
+    volumes:
+      - ./cookies.txt:/app/cookies.txt
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
