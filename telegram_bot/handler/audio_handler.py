@@ -4,6 +4,7 @@ import logging
 from ..bot import TELEGRAM_TOKEN
 import json
 from telegram_bot.db.models import Music, SearchLog
+import os
 
 async def search_music(query):
     existing_log = await SearchLog.get_or_none(query=query)
@@ -46,6 +47,7 @@ async def search_music(query):
     return []
 
 async def download_music(music_id):
+    os.makedirs("music", exist_ok=True)
     ydl_opts = {
         'format': 'bestaudio/best',
         'quiet': True,
