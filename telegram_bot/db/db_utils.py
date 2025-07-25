@@ -4,10 +4,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 
-env_path = Path(__file__).resolve().parents[2] / ".env"
-load_dotenv(env_path)
-
-DB_URL = os.getenv('db_url')
+load_dotenv()
+DB_URL = os.getenv('db_url', 'sqlite://db.sqlite3')
 
 async def init_db():
     # Here we connect to a SQLite DB file.
