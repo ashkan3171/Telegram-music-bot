@@ -18,3 +18,5 @@ music/
 
 # Logs
 *.log
+
+telegram_bot/cookies.txt
