@@ -17,7 +17,7 @@ async def search_music(query):
         'format': 'bestaudio/best',
         'quiet': True,
         'noplaylist': True,
-        'cookiefile': 'cookies.txt'
+        'cookiefile': './telegram_bot/cookies.txt'
     }
 
     results = []
@@ -54,7 +54,7 @@ async def download_music(music_id):
         'quiet': True,
         'noplaylist': True,
         'outtmpl': 'music/%(title)s.mp3',
-        'cookiefile': 'cookies.txt'
+        'cookiefile': './telegram_bot/cookies.txt'
     }
     result = None
     try:
