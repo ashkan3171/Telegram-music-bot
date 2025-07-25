@@ -1,9 +1,12 @@
 from tortoise import Tortoise, run_async
 from telegram_bot.db.models import User
 from dotenv import load_dotenv
+from pathlib import Path
 import os
 
-load_dotenv(f"F:\\Telegram_music\\.env")
+env_path = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(env_path)
+
 DB_URL = os.getenv('db_url')
 
 async def init_db():
@@ -21,7 +24,7 @@ async def close_db():
     await Tortoise.close_connections()
 
 async def show_all_users():
-    """نمایش تمام کاربران ثبت‌شده"""
+    
     users = await User.all().values()
     print("===== Users in Database =====")
     for user in users:
