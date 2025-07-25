@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+
+# Environment variables
+.env
+
+# SQLite database
+db.sqlite3
+db.sqlite3-shm
+db.sqlite3-wal
+
+# Downloaded music folder (if added later)
+music/
+
+# Logs
+*.log
