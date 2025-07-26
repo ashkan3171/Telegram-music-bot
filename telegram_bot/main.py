@@ -162,14 +162,15 @@ async def telegram_webhook(req: Request):
             # Check database before download 
             existing_music = await Music.get_or_none(music_id=music_id)
 
+            logging.info(f"Checking cached music in database: {existing_music}")
+
             file_ready = (
                 existing_music is not None
                 and isinstance(existing_music.audio_file, str)
                 and existing_music.audio_file.strip() != ""
-                and os.path.exists(existing_music.audio_file)
+                and os.path.isfile(existing_music.audio_file)
             )
-
-            logging.info(f"Cached file path check -> {getattr(existing_music, 'audio_file', None)} | Ready={file_ready}")
+            logging.info(f"Cache check result → file_ready={file_ready}, audio_file={getattr(existing_music, 'audio_file', None)}")
 
             if file_ready:
                 logging.info(f"🎵 Sending cached music: {existing_music.title}")
@@ -184,6 +185,7 @@ async def telegram_webhook(req: Request):
                 return
 
             # Step 7: Download the music
+            logging.info(f"Downloading music from YouTube for music_id={music_id}")
             downloaded_music = await download_music(music_id)
             if not downloaded_music:
                 logging.warning(f"⚠️ Failed to download music with ID: {music_id} for chat_id={chat_id}")
