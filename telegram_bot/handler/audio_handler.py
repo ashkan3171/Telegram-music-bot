@@ -62,8 +62,8 @@ async def download_music(music_id):
             info = ydl.extract_info(music_id, download=True)
             if info:
                 
-                filename = os.path.basename(ydl.prepare_filename(info))
-                audio_path = f'./music/{filename}'
+                filename = f"{info.get('title', '')}"
+                audio_path = f'./music/{filename}.mp3'
 
                 result = {
                     'music_id': music_id,
