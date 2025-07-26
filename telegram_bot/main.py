@@ -161,8 +161,12 @@ async def telegram_webhook(req: Request):
             
             # Check database before download 
             existing_music = await Music.get_or_none(music_id=music_id)
-            if existing_music and isinstance(existing_music.audio_file, str) and existing_music.audio_file and os.path.exists(existing_music.audio_file):
-                logging.info(f"🎵 Sending cached music: {existing_music.title}")
+            if(
+                existing_music
+                and isinstance(existing_music.audio_file, str)
+                and existing_music.audio_file.strip() != ""
+                and os.path.exists(existing_music.audio_file)
+            ):
                 music_sent = await send_music(chat_id, {
                     'music_id': existing_music.music_id,
                     'title': existing_music.title,
@@ -183,9 +187,14 @@ async def telegram_webhook(req: Request):
                         logging.error(f"❌ Couldn't even send the warning -> download music!")
                     return
                 
-                    # Save music in database
-                await save_music(downloaded_music)
-                    # Step 8: Send the music
+                # Save music in database
+                if existing_music:
+                    existing_music.audio_file = downloaded_music['audio_file']
+                    await existing_music.save()
+                else:
+                    await save_music(downloaded_music)
+                    
+                # Step 8: Send the music
                 music_sent = await send_music(chat_id, downloaded_music)
                 if not music_sent:
                     logging.warning(f"⚠️ Failed to send music with ID: {music_id} for chat_id={chat_id}")
