@@ -160,11 +160,11 @@ async def telegram_webhook(req: Request):
             if not delete_dis_buttons:
                 logging.warning(f"❌ Couldn't delete choices message: chat_id={chat_id}, message_id={message_id}")
             
-            # Check database before download 
+            # --- Check database before download ---
             existing_music = await Music.get_or_none(music_id=music_id)
             logging.info(f"DB record fetched → {existing_music}")
 
-            audio_path = getattr(existing_music, "audio_file", None)
+            audio_path = existing_music.audio_file if (existing_music and existing_music.audio_file) else None
             file_ready = audio_path and isinstance(audio_path, str) and audio_path.strip() != "" and os.path.isfile(audio_path)
 
             logging.info(f"Cache check → file_ready={file_ready}, audio_path={audio_path}")
@@ -181,14 +181,14 @@ async def telegram_webhook(req: Request):
                 })
                 return
 
-            # Step 7: Download the music
+            # --- Step 7: Download the music ---
             downloaded_music = await download_music(music_id)
             if not downloaded_music:
                 logging.warning(f"⚠️ Failed to download music with ID: {music_id} for chat_id={chat_id}")
                 await send_message(chat_id, "⚠️ Sorry, I couldn't download the selected music. Please try again later!")
                 return
-            
-            # Save music in database
+
+            # --- Save music in database ---
             try:
                 if existing_music:
                     existing_music.audio_file = downloaded_music['audio_file']
@@ -200,16 +200,17 @@ async def telegram_webhook(req: Request):
                     logging.info(f"💾 Saved new music {music_id} into database")
             except Exception as e:
                 logging.exception(f"Error saving music: {e}")
-                
-                # Step 8: Send the music
-                music_sent = await send_music(chat_id, downloaded_music)
-                if not music_sent:
-                    logging.warning(f"⚠️ Failed to send music with ID: {music_id} for chat_id={chat_id}")
-                    warning_text = f"⚠️ Sorry, I couldn't send the selected music. Please try again later!"
-                    music_sent_warning = await send_message(chat_id, warning_text)
-                    if not music_sent_warning:
-                        logging.error(f"❌ Couldn't even send the warning -> send music!")
-                    return               
+
+            # --- Step 8: Send the music ---
+            music_sent = await send_music(chat_id, downloaded_music)
+            if not music_sent:
+                logging.warning(f"⚠️ Failed to send music with ID: {music_id} for chat_id={chat_id}")
+                warning_text = f"⚠️ Sorry, I couldn't send the selected music. Please try again later!"
+                music_sent_warning = await send_message(chat_id, warning_text)
+                if not music_sent_warning:
+                    logging.error(f"❌ Couldn't even send the warning -> send music!")
+                return
+          
 
         elif 'inline_query' in data:
             inline_query = data['inline_query']
