@@ -118,16 +118,13 @@ async def save_music(music_data):
         if existing:
             return existing
         
-        # Saving the audio_file
-        audio_file_path = os.path.abspath(music_data['audio_file'])
-
         new_music = await Music.create(
             music_id=music_data['music_id'],
             title=music_data['title'],
             duration=music_data['duration'],
             youtube_url=music_data['youtube_url'],
             uploader=music_data['uploader'],
-            audio_file=audio_file_path
+            audio_file=music_data['audio_file']  # <--- تغییر مهم
         )
         return new_music
     except Exception as e:

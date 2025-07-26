@@ -164,22 +164,14 @@ async def telegram_webhook(req: Request):
             existing_music = await Music.get_or_none(music_id=music_id)
             logging.info(f"DB record fetched → {existing_music}")
 
-            audio_path = existing_music.audio_file if (existing_music and existing_music.audio_file) else None
-            file_ready = audio_path and isinstance(audio_path, str) and audio_path.strip() != "" and os.path.isfile(audio_path)
+            audio_path = getattr(existing_music, "audio_file", None)
+            if audio_path and not os.path.isabs(audio_path):
+                audio_path = os.path.join("music", audio_path)
 
-            logging.info(f"Cache check → file_ready={file_ready}, audio_path={audio_path}")
-
-            if file_ready:
-                logging.info(f"🎵 Sending cached music: {existing_music.title}")
-                await send_music(chat_id, {
-                    'music_id': existing_music.music_id,
-                    'title': existing_music.title,
-                    'duration': existing_music.duration,
-                    'youtube_url': existing_music.youtube_url,
-                    'uploader': existing_music.uploader,
-                    'audio_file': existing_music.audio_file
-                })
-                return
+            file_ready = (
+                audio_path is not None
+                and os.path.isfile(audio_path)
+            )
 
             # --- Step 7: Download the music ---
             downloaded_music = await download_music(music_id)
