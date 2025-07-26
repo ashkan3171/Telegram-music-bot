@@ -139,9 +139,6 @@ async def telegram_webhook(req: Request):
                         'uploader': music.uploader       
                     })
                     return
-            else:
-                chat_id = callback['message']['chat']['id']
-                await send_message(chat_id, "⚠️ Music file not found.")
 
             chat_id = callback['message']['chat']['id']
             message_id = callback['message']['message_id']

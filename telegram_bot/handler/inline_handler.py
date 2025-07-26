@@ -9,7 +9,6 @@ async def handle_inline_query(inline_query):
 
     user = await User.get_or_none(user_id=user_id)
     if not user:
-        
         return inline_query_id, [{
             "type": "article",
             "id": "no-user",
@@ -41,7 +40,7 @@ async def handle_inline_query(inline_query):
                 "input_message_content": {"message_text": f"🎵 {music.title}\n🔗 {music.youtube_url}"},
                 "reply-markup":{
                     "inline_keyboard": [[
-                        {"text": "▶ Play", "callback_data": f"playlist_music:{music.music_id}"}
+                        {"text": "▶ Play", "callback_data": f"playlsit_music:{music.music_id}"}
                     ]]
                 }
             })
