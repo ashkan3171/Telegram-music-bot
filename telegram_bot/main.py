@@ -163,11 +163,13 @@ async def telegram_webhook(req: Request):
             existing_music = await Music.get_or_none(music_id=music_id)
 
             file_ready = (
-                existing_music
+                existing_music is not None
                 and isinstance(existing_music.audio_file, str)
                 and existing_music.audio_file.strip() != ""
                 and os.path.exists(existing_music.audio_file)
             )
+
+            logging.info(f"Cached file path check -> {getattr(existing_music, 'audio_file', None)} | Ready={file_ready}")
 
             if file_ready:
                 logging.info(f"🎵 Sending cached music: {existing_music.title}")
@@ -194,8 +196,10 @@ async def telegram_webhook(req: Request):
                     existing_music.audio_file = downloaded_music['audio_file']
                     existing_music.uploader = downloaded_music['uploader']
                     await existing_music.save()
+                    logging.info(f"🔄 Updated cached music path for {music_id}")
                 else:
                     await save_music(downloaded_music)
+                    logging.info(f"💾 Saved new music {music_id} into database")
             except Exception as e:
                 logging.exception(f"Error saving music: {e}")
                 
