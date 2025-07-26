@@ -49,12 +49,15 @@ async def search_music(query):
     return []
 
 async def download_music(music_id):
-    os.makedirs("music", exist_ok=True)
+    # مسیر ثابت داخل کانتینر
+    music_dir = "/app/music"
+    os.makedirs(music_dir, exist_ok=True)
+
     ydl_opts = {
         'format': 'bestaudio/best',
         'quiet': True,
         'noplaylist': True,
-        'outtmpl': 'music/%(title)s.%(ext)s',
+        'outtmpl': f'{music_dir}/%(title)s.mp3', 
         'cookiefile': './telegram_bot/cookies.txt'
     }
     result = None
@@ -62,20 +65,15 @@ async def download_music(music_id):
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(music_id, download=True)
             if info:
-                # مسیر کامل فایل
+                # مسیر کامل (داخل کانتینر)
                 full_path = ydl.prepare_filename(info)
-                # فقط نام فایل رو می‌گیریم (مثل Oghyanoos.mp3)
-                filename = os.path.basename(full_path)
-                # مسیر نسبی نهایی: music/Oghyanoos.mp3
-                relative_path = os.path.join("music", filename)
-
                 result = {
                     'music_id': music_id,
                     'title': info.get('title', ''),
                     'duration': info.get('duration', 0),
                     'uploader': info.get('uploader'),
                     'youtube_url': info.get('webpage_url', ''),
-                    'audio_file': relative_path  # مسیر استاندارد داخل پوشه music
+                    'audio_file': full_path
                 }
         return result
     except Exception as e:
