@@ -54,7 +54,7 @@ async def download_music(music_id):
         'format': 'bestaudio/best',
         'quiet': True,
         'noplaylist': True,
-        'outtmpl': 'music/%(title)s.mp3',
+        'outtmpl': 'music/%(title)s.%(ext)s',
         'cookiefile': './telegram_bot/cookies.txt'
     }
     result = None
@@ -62,13 +62,18 @@ async def download_music(music_id):
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(music_id, download=True)
             if info:
+                # مسیر کامل خروجی از yt-dlp
+                full_path = ydl.prepare_filename(info)
+                # مسیر رو نسبی می‌کنیم (برای ذخیره در دیتابیس)
+                relative_path = os.path.relpath(full_path)
+
                 result = {
                     'music_id': music_id,
-                    'title' : info.get('title', ''),
-                    'duration' : info.get('duration', 0),  # عدد ثانیه
-                    'uploader' : info.get('uploader'),
-                    'youtube_url' : info.get('webpage_url', ''),
-                    'audio_file' : ydl.prepare_filename(info)
+                    'title': info.get('title', ''),
+                    'duration': info.get('duration', 0),  # عدد (ثانیه)
+                    'uploader': info.get('uploader'),
+                    'youtube_url': info.get('webpage_url', ''),
+                    'audio_file': relative_path  # مسیر نسبی درست
                 }
         return result
     except Exception as e:
