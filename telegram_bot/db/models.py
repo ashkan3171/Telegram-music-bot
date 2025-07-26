@@ -20,8 +20,10 @@ class Music(Model):
     title = fields.CharField(max_length=255)
     duration = fields.IntField()
     youtube_url = fields.CharField(max_length=255)
+    uploader = fields.CharField(max_length=255, null=True)
+    audio_file = fields.CharField(max_length=255)
     created_at = fields.DatetimeField(auto_now_add=True)
-
+    
     class Meta:
         table = 'musics'
 

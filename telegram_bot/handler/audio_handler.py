@@ -122,7 +122,9 @@ async def save_music(music_data):
             music_id=music_data['music_id'],
             title=music_data['title'],
             duration=music_data['duration'],
-            youtube_url=music_data['youtube_url']
+            youtube_url=music_data['youtube_url'],
+            uploader = music_data['uploader'],
+            audio_file = music_data['title']
         )
         return new_music
     except Exception as e:

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 import logging
+import os
 from html import escape
 from telegram_bot.handler.command_handler import start_bot
 from telegram_bot.utils.telegram_api import delete_message, send_message
@@ -8,7 +9,7 @@ from telegram_bot.handler.button_handler import disable_button, send_choices
 from telegram_bot.handler.favorite_handler import add_favorite, remove_favorite
 from telegram_bot.handler.inline_handler import playlist_inline_query, handle_inline_query
 from telegram_bot.db.db_utils import init_db, close_db
-from telegram_bot.db.models import User
+from telegram_bot.db.models import User, Music
 
 
 logging.basicConfig(
@@ -123,6 +124,24 @@ async def telegram_webhook(req: Request):
                     logging.warning(f"⚠️ Couldn't remove the music from favorite playlist: music_id={callback['data']}, chat_id={callback['message']['chat']['id']}")
                 return           
             
+            # Send Music from Playlist
+            if callback['data'].startswith('playlist_music:'):
+                music_id = callback['data'].split(':')[1]
+                chat_id = callback['message']['chat']['id']
+                music = await Music.get_or_none(music_id=music_id)
+                if music and os.path.exists(music.audio_file):
+                    await send_music(chat_id, {
+                        'music_id': music.music_id,
+                        'title': music.title,
+                        'duration': music.duration,
+                        'youtube_url': music.youtube_url,
+                        'audio_file': music.audio_file,
+                        'uploader': music.uploader       
+                    })
+            else:
+                chat_id = callback['message']['chat']['id']
+                await send_message(chat_id, "⚠️ Music file not found.")
+
             chat_id = callback['message']['chat']['id']
             message_id = callback['message']['message_id']
             text = callback['message'].get('text', '')
@@ -139,28 +158,41 @@ async def telegram_webhook(req: Request):
             delete_dis_buttons = await delete_message(chat_id, message_id)
             if not delete_dis_buttons:
                 logging.warning(f"❌ Couldn't delete choices message: chat_id={chat_id}, message_id={message_id}")
-
+            
+            # Check database before download 
+            existing_music = await Music.get_or_none(music_id=music_id)
+            if existing_music and os.path.exists(existing_music.audio_file):
+                logging.info(f"🎵 Sending cached music: {existing_music.title}")
+                music_sent = await send_music(chat_id, {
+                    'music_id': existing_music.music_id,
+                    'title': existing_music.title,
+                    'duration': existing_music.duration,
+                    'youtube_url': existing_music.youtube_url,
+                    'uploader': existing_music.uploader,
+                    'audio_file': existing_music.audio_file
+                })
+            else:
             # Step 7: Download the music
-            downloaded_music = await download_music(music_id)
-            if not downloaded_music:
-                logging.warning(f"⚠️ Failed to download music with ID: {music_id} for chat_id={chat_id}")
-                warning_text = f"⚠️ Sorry, I couldn't download the selected music. Please try again later!"
-                downloaded_music_warning = await send_message(chat_id, warning_text)
-                if not downloaded_music_warning:
-                    logging.error(f"❌ Couldn't even send the warning -> download music!")
-                return
-            elif download_music:
-                # Save music in database
-                await save_music(downloaded_music)
-                # Step 8: Send the music
-                music_sent = await send_music(chat_id, downloaded_music)
-                if not music_sent:
-                    logging.warning(f"⚠️ Failed to send music with ID: {music_id} for chat_id={chat_id}")
-                    warning_text = f"⚠️ Sorry, I couldn't send the selected music. Please try again later!"
-                    music_sent_warning = await send_message(chat_id, warning_text)
-                    if not music_sent_warning:
-                        logging.error(f"❌ Couldn't even send the warning -> send music!")
-                    return               
+                downloaded_music = await download_music(music_id)
+                if not downloaded_music:
+                    logging.warning(f"⚠️ Failed to download music with ID: {music_id} for chat_id={chat_id}")
+                    warning_text = f"⚠️ Sorry, I couldn't download the selected music. Please try again later!"
+                    downloaded_music_warning = await send_message(chat_id, warning_text)
+                    if not downloaded_music_warning:
+                        logging.error(f"❌ Couldn't even send the warning -> download music!")
+                    return
+                elif download_music:
+                    # Save music in database
+                    await save_music(downloaded_music)
+                    # Step 8: Send the music
+                    music_sent = await send_music(chat_id, downloaded_music)
+                    if not music_sent:
+                        logging.warning(f"⚠️ Failed to send music with ID: {music_id} for chat_id={chat_id}")
+                        warning_text = f"⚠️ Sorry, I couldn't send the selected music. Please try again later!"
+                        music_sent_warning = await send_message(chat_id, warning_text)
+                        if not music_sent_warning:
+                            logging.error(f"❌ Couldn't even send the warning -> send music!")
+                        return               
 
         elif 'inline_query' in data:
             inline_query = data['inline_query']
