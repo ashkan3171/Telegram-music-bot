@@ -78,7 +78,6 @@ async def download_music(music_id):
         logging.exception(f'There was error in downloading the music: {e}')
     return None
 
-
 async def save_music(music_data):
     try:
         existing = await Music.get_or_none(music_id=music_data['music_id'])

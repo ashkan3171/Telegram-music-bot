@@ -160,40 +160,22 @@ async def telegram_webhook(req: Request):
             if not delete_dis_buttons:
                 logging.warning(f"❌ Couldn't delete choices message: chat_id={chat_id}, message_id={message_id}")
             
-            # --- Check database before download ---
-            existing_music = await Music.get_or_none(music_id=music_id)
-            logging.info(f"DB record fetched → {existing_music}")
-
-            audio_path = getattr(existing_music, "audio_file", None)
-            if audio_path and not os.path.isabs(audio_path):
-                audio_path = os.path.join("music", audio_path)
-
-            file_ready = (
-                audio_path is not None
-                and os.path.isfile(audio_path)
-            )
-
-            # --- Step 7: Download the music ---
+            # Check database before download
+            #existing_music = await Music.get_or_none(music_id=music_id)
+            #if not existing_music:
+            # Step 7: Download the music
             downloaded_music = await download_music(music_id)
             logging.info(f"Here is the audio_file {downloaded_music['audio_file']}")
             if not downloaded_music:
                 logging.warning(f"⚠️ Failed to download music with ID: {music_id} for chat_id={chat_id}")
                 await send_message(chat_id, "⚠️ Sorry, I couldn't download the selected music. Please try again later!")
                 return
-
-            # --- Save music in database ---
-            try:
-                if existing_music:
-                    existing_music.audio_file = downloaded_music['audio_file']
-                    existing_music.uploader = downloaded_music['uploader']
-                    await existing_music.save()
-                    logging.info(f"🔄 Updated cached music path for {music_id}")
-                else:
-                    await save_music(downloaded_music)
-                    logging.info(f"💾 Saved new music {music_id} into database")
-            except Exception as e:
-                logging.exception(f"Error saving music: {e}")
-
+            # Save music in database
+            saved_music = await save_music(downloaded_music)
+            logging.info(f"💾 Saved new music {music_id} into database")
+            if not saved_music:
+                logging.warning(f"⚠️ Failed to save the music with ID: {music_id} for chat_id={chat_id}")
+            
             # --- Step 8: Send the music ---
             music_sent = await send_music(chat_id, downloaded_music)
             if not music_sent:
