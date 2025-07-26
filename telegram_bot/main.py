@@ -181,19 +181,20 @@ async def telegram_webhook(req: Request):
                 downloaded_music = await download_music(music_id)
                 if not downloaded_music:
                     logging.warning(f"⚠️ Failed to download music with ID: {music_id} for chat_id={chat_id}")
-                    warning_text = f"⚠️ Sorry, I couldn't download the selected music. Please try again later!"
-                    downloaded_music_warning = await send_message(chat_id, warning_text)
-                    if not downloaded_music_warning:
-                        logging.error(f"❌ Couldn't even send the warning -> download music!")
+                    await send_message(chat_id, "⚠️ Sorry, I couldn't download the selected music. Please try again later!")
                     return
-                
-                # Save music in database
+            
+            # Save music in database
+            try:
                 if existing_music:
                     existing_music.audio_file = downloaded_music['audio_file']
+                    existing_music.uploader = downloaded_music['uploader']
                     await existing_music.save()
                 else:
                     await save_music(downloaded_music)
-                    
+            except Exception as e:
+                logging.exception(f"Error saving music: {e}")
+                
                 # Step 8: Send the music
                 music_sent = await send_music(chat_id, downloaded_music)
                 if not music_sent:
