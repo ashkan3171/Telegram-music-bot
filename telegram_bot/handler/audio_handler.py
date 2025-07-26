@@ -26,15 +26,16 @@ async def search_music(query):
             info = ydl.extract_info(search_url, download=False)
             entries = info.get('entries', [])
             for idx, entry in enumerate(entries):
-                duration = entry.get('duration', 0)
-                duration_minute = duration // 60
-                duration_second = duration % 60
+                duration_sec = entry.get('duration', 0)
+                duration_minute = duration_sec // 60
+                duration_second = duration_sec % 60
                 duration_format = f"{duration_minute}:{duration_second:02d}"
                 result = {
                     'idx': idx,
                     'music_id': entry.get('id', ''),
                     'title': entry.get('title', ''),
-                    'duration': duration_format,
+                    'duration': duration_sec,   # عدد ثانیه ذخیره می‌کنیم
+                    'duration_str': duration_format,  # فقط برای نمایش
                     'youtube_url': entry.get('webpage_url', ''),
                     'uploader': entry.get('uploader')
                 }
@@ -64,7 +65,7 @@ async def download_music(music_id):
                 result = {
                     'music_id': music_id,
                     'title' : info.get('title', ''),
-                    'duration' : info.get('duration', 0),
+                    'duration' : info.get('duration', 0),  # عدد ثانیه
                     'uploader' : info.get('uploader'),
                     'youtube_url' : info.get('webpage_url', ''),
                     'audio_file' : ydl.prepare_filename(info)
@@ -73,6 +74,24 @@ async def download_music(music_id):
     except Exception as e:
         logging.exception(f'There was error in downloading the music: {e}')
     return None
+
+async def save_music(music_data):
+    try:
+        existing = await Music.get_or_none(music_id=music_data['music_id'])
+        if existing:
+            return existing
+        
+        new_music = await Music.create(
+            music_id=music_data['music_id'],
+            title=music_data['title'],
+            duration=music_data['duration'],  # عدد ثانیه
+            youtube_url=music_data['youtube_url'],
+            uploader=music_data['uploader'],
+            audio_file=music_data['audio_file']
+        )
+        return new_music
+    except Exception as e:
+        logging.exception(f"There was an error in saving music: {e}")
 
 async def send_music(chat_id, music_data):
     URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendAudio"
@@ -88,7 +107,6 @@ async def send_music(chat_id, music_data):
                     'duration': music_data.get('duration', 0),
                     'title': music_data.get('title', ''),
                     'performer': music_data.get('uploader', ''),
-                    'youtube_url': music_data.get('webpage_url', ''),
                     'reply_markup': json.dumps({
                         'inline_keyboard': [
                             [
@@ -111,21 +129,3 @@ async def send_music(chat_id, music_data):
     except Exception as e:
         logging.exception(f"There was an error in sending the music: {e}")
     return False
-
-async def save_music(music_data):
-    try:
-        existing = await Music.get_or_none(music_id=music_data['music_id'])
-        if existing:
-            return existing
-        
-        new_music = await Music.create(
-            music_id=music_data['music_id'],
-            title=music_data['title'],
-            duration=music_data['duration'],
-            youtube_url=music_data['youtube_url'],
-            uploader=music_data['uploader'],
-            audio_file=music_data['audio_file']  # <--- تغییر مهم
-        )
-        return new_music
-    except Exception as e:
-        logging.exception(f"There was an error in saving music: {e}")
