@@ -49,6 +49,8 @@ async def search_music(query):
     return []
 
 async def download_music(music_id):
+    import os
+    os.makedirs("music", exist_ok=True)
     ydl_opts = {
         'format': 'bestaudio/best',
         'quiet': True,
@@ -58,12 +60,13 @@ async def download_music(music_id):
     }
     result = None
     try:
+        from yt_dlp import YoutubeDL
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(music_id, download=True)
             if info:
-                
-                filename = f"{info.get('title', '')}"
-                audio_path = f'./music/{filename}.mp3'
+                # فقط اسم فایل + مسیر music
+                filename = os.path.basename(ydl.prepare_filename(info))
+                audio_path = f'./music/{filename}'  # رشته ثابت
 
                 result = {
                     'music_id': music_id,
@@ -71,12 +74,14 @@ async def download_music(music_id):
                     'duration': info.get('duration', 0),
                     'uploader': info.get('uploader'),
                     'youtube_url': info.get('webpage_url', ''),
-                    'audio_file': audio_path   
+                    'audio_file': audio_path  # مسیر مشخص
                 }
         return result
     except Exception as e:
+        import logging
         logging.exception(f'There was error in downloading the music: {e}')
     return None
+
 
 async def save_music(music_data):
     try:
