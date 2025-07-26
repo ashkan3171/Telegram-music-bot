@@ -175,6 +175,7 @@ async def telegram_webhook(req: Request):
                     'uploader': existing_music.uploader,
                     'audio_file': existing_music.audio_file
                 })
+                return
 
             # Step 7: Download the music
             else: 
