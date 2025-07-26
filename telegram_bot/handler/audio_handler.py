@@ -62,18 +62,20 @@ async def download_music(music_id):
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(music_id, download=True)
             if info:
-                # مسیر کامل خروجی از yt-dlp
+                # مسیر کامل فایل
                 full_path = ydl.prepare_filename(info)
-                # مسیر رو نسبی می‌کنیم (برای ذخیره در دیتابیس)
-                relative_path = os.path.relpath(full_path)
+                # فقط نام فایل رو می‌گیریم (مثل Oghyanoos.mp3)
+                filename = os.path.basename(full_path)
+                # مسیر نسبی نهایی: music/Oghyanoos.mp3
+                relative_path = os.path.join("music", filename)
 
                 result = {
                     'music_id': music_id,
                     'title': info.get('title', ''),
-                    'duration': info.get('duration', 0),  # عدد (ثانیه)
+                    'duration': info.get('duration', 0),
                     'uploader': info.get('uploader'),
                     'youtube_url': info.get('webpage_url', ''),
-                    'audio_file': relative_path  # مسیر نسبی درست
+                    'audio_file': relative_path  # مسیر استاندارد داخل پوشه music
                 }
         return result
     except Exception as e:
