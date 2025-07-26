@@ -49,15 +49,11 @@ async def search_music(query):
     return []
 
 async def download_music(music_id):
-    # مسیر ثابت داخل کانتینر
-    music_dir = "/app/music"
-    os.makedirs(music_dir, exist_ok=True)
-
     ydl_opts = {
         'format': 'bestaudio/best',
         'quiet': True,
         'noplaylist': True,
-        'outtmpl': f'{music_dir}/%(title)s.mp3', 
+        'outtmpl': './music/%(title)s.mp3',
         'cookiefile': './telegram_bot/cookies.txt'
     }
     result = None
@@ -65,15 +61,17 @@ async def download_music(music_id):
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(music_id, download=True)
             if info:
-                # مسیر کامل (داخل کانتینر)
-                full_path = ydl.prepare_filename(info)
+                
+                filename = os.path.basename(ydl.prepare_filename(info))
+                audio_path = f'./music/{filename}'
+
                 result = {
                     'music_id': music_id,
                     'title': info.get('title', ''),
                     'duration': info.get('duration', 0),
                     'uploader': info.get('uploader'),
                     'youtube_url': info.get('webpage_url', ''),
-                    'audio_file': full_path
+                    'audio_file': audio_path   
                 }
         return result
     except Exception as e:
