@@ -76,6 +76,7 @@ async def download_music(music_id):
                     'youtube_url': info.get('webpage_url', ''),
                     'audio_file': audio_path  # مسیر مشخص
                 }
+        print(f"-------------------------\n {result['audio_file']}\n ----------------")
         return result
     except Exception as e:
         import logging
