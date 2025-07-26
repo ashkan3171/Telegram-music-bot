@@ -5,6 +5,7 @@ from ..bot import TELEGRAM_TOKEN
 import json
 from telegram_bot.db.models import Music, SearchLog
 import os
+import logging
 
 async def search_music(query):
     existing_log = await SearchLog.get_or_none(query=query)
@@ -76,10 +77,9 @@ async def download_music(music_id):
                     'youtube_url': info.get('webpage_url', ''),
                     'audio_file': audio_path  # مسیر مشخص
                 }
-        print(f"-------------------------\n {result['audio_file']}\n ----------------")
+        logging.info(f"-------------------------\n {result['audio_file']}\n --------------")
         return result
     except Exception as e:
-        import logging
         logging.exception(f'There was error in downloading the music: {e}')
     return None
 
