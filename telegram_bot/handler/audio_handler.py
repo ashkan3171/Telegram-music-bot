@@ -55,7 +55,7 @@ async def download_music(music_id):
         'format': 'bestaudio/best',
         'quiet': True,
         'noplaylist': True,
-        'outtmpl': './music/%(title)s.mp3',
+        'outtmpl': './music/%(title)s.%(ext)s',
         'cookiefile': './telegram_bot/cookies.txt'
     }
     result = None
