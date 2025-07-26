@@ -56,7 +56,7 @@ async def download_music(music_id):
         'format': 'bestaudio/best',
         'quiet': True,
         'noplaylist': True,
-        'outtmpl': './music/%(title)s.%(ext)s',
+        'outtmpl': './music/%(title)s.mp3',
         'cookiefile': './telegram_bot/cookies.txt'
     }
     result = None
@@ -65,19 +65,14 @@ async def download_music(music_id):
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(music_id, download=True)
             if info:
-                # فقط اسم فایل + مسیر music
-                filename = os.path.basename(ydl.prepare_filename(info))
-                audio_path = f'./music/{filename}'  # رشته ثابت
-
                 result = {
                     'music_id': music_id,
                     'title': info.get('title', ''),
                     'duration': info.get('duration', 0),
                     'uploader': info.get('uploader'),
                     'youtube_url': info.get('webpage_url', ''),
-                    'audio_file': audio_path  # مسیر مشخص
+                    'audio_file': f"./music/{info.get('title', '')}.mp3" 
                 }
-        logging.info(f"-------------------------\n {result['audio_file']}\n --------------")
         return result
     except Exception as e:
         logging.exception(f'There was error in downloading the music: {e}')

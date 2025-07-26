@@ -175,6 +175,7 @@ async def telegram_webhook(req: Request):
 
             # --- Step 7: Download the music ---
             downloaded_music = await download_music(music_id)
+            logging.info(f"Here is the audio_file {downloaded_music['audio_file']}")
             if not downloaded_music:
                 logging.warning(f"⚠️ Failed to download music with ID: {music_id} for chat_id={chat_id}")
                 await send_message(chat_id, "⚠️ Sorry, I couldn't download the selected music. Please try again later!")
