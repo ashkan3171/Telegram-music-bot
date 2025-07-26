@@ -165,7 +165,7 @@ async def telegram_webhook(req: Request):
             logging.info(f"DB record fetched → {existing_music}")
 
             audio_path = getattr(existing_music, "audio_file", None)
-            file_ready = bool(audio_path and isinstance(audio_path, str) and os.path.isfile(audio_path))
+            file_ready = audio_path and isinstance(audio_path, str) and audio_path.strip() != "" and os.path.isfile(audio_path)
 
             logging.info(f"Cache check → file_ready={file_ready}, audio_path={audio_path}")
 
