@@ -4,7 +4,7 @@ import os
 from html import escape
 from telegram_bot.handler.command_handler import start_bot
 from telegram_bot.utils.telegram_api import delete_message, send_message
-from telegram_bot.handler.audio_handler import search_music, download_music, send_music, save_music
+from telegram_bot.handler.audio_handler import search_music, download_music, send_music, save_music, send_playlist_music
 from telegram_bot.handler.button_handler import disable_button, send_choices
 from telegram_bot.handler.favorite_handler import add_favorite, remove_favorite
 from telegram_bot.handler.inline_handler import playlist_inline_query, handle_inline_query
@@ -128,17 +128,8 @@ async def telegram_webhook(req: Request):
             if callback['data'].startswith('playlist_music:'):
                 music_id = callback['data'].split(':')[1]
                 chat_id = callback['message']['chat']['id']
-                music = await Music.get_or_none(music_id=music_id)
-                if music:
-                    await send_music(chat_id, {
-                        'music_id': music.music_id,
-                        'title': music.title,
-                        'duration': music.duration,
-                        'youtube_url': music.youtube_url,
-                        'audio_file': music.audio_file,
-                        'uploader': music.uploader       
-                    })
-                    return
+                await send_playlist_music(chat_id, music_id)
+                return
 
             chat_id = callback['message']['chat']['id']
             message_id = callback['message']['message_id']

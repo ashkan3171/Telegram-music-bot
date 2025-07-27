@@ -138,3 +138,25 @@ async def send_music(chat_id, music_data):
     except Exception as e:
         logging.exception(f"There was an error in sending the music: {e}")
     return False
+
+async def send_playlist_music(chat_id, music_id):
+    """
+    Send an existing music from playlist using file_id (no search or download)
+    """
+    music = await Music.get_or_none(music_id=music_id)
+    if not music or not music.file_id:
+        logging.warning(f"No music or no file_id found for music_id={music_id}")
+        return False
+
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendAudio"
+    payload = {
+        "chat_id": chat_id,
+        "audio": music.file_id,
+        "caption": f"🔗 {music.youtube_url}"
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, data=payload)
+        response.raise_for_status()
+        logging.info(f"Sent music {music.title} from playlist using file_id")
+        return True

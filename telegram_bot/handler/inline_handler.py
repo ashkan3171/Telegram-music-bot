@@ -29,14 +29,18 @@ async def handle_inline_query(inline_query):
     else:
         for idx, pl in enumerate(playlists):
             music = pl.music
-            duration_minute = music.duration // 60
-            duration_second = music.duration % 60
-            duration_str = f"{duration_minute}:{duration_second:02d}"
             results.append({
                 "type": "audio",
                 "id": str(idx),
                 "title": music.title,
-                "audio_file_id": music.file_id
+                "audio_file_id": music.file_id,
+                "reply_markup": {
+                    "inline_keyboard":[
+                        [
+                            {"text":f"{idx+1}", "callback_data":f"playlist_music:{music.music_id}"}
+                        ]
+                    ]
+                }
             })
     return inline_query_id, results
 
