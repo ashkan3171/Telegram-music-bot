@@ -37,14 +37,14 @@ async def handle_inline_query(inline_query):
                 "reply_markup": {
                     "inline_keyboard":[
                         [
-                            {"text":f"{idx+1}", "callback_data":f"playlist_music:{music.music_id}"}
+                            {"text":f"{idx+1} - {music.title} ", "callback_data":f"playlist_music:{music.music_id}"}
                         ]
                     ]
                 }
             })
     return inline_query_id, results
 
-async def playlist_inline_query(inline_query_id, results):
+async def playlist_inline_query(inline_query_id, results):  
     URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/answerInlineQuery"
     payload = {
         'inline_query_id': inline_query_id,
