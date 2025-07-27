@@ -36,8 +36,7 @@ async def handle_inline_query(inline_query):
                 "type": "audio",
                 "id": str(idx),
                 "title": music.title,
-                "audio_file_id": music.file_id,
-                "input_message_content": {"message_text": f"🎵 {music.title}\n🔗 {music.youtube_url}"}, 
+                "audio_file_id": music.file_id
             })
     return inline_query_id, results
 
