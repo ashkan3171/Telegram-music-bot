@@ -33,16 +33,11 @@ async def handle_inline_query(inline_query):
             duration_second = music.duration % 60
             duration_str = f"{duration_minute}:{duration_second:02d}"
             results.append({
-                "type": "article",
+                "type": "audio",
                 "id": str(idx),
                 "title": music.title,
-                "description": f"⏱ {duration_str}",
-                "input_message_content": {"message_text": f"🎵 {music.title}\n🔗 {music.youtube_url}"},
-                "reply-markup":{
-                    "inline_keyboard": [[
-                        {"text": "▶ Play", "callback_data": f"playlsit_music:{music.music_id}"}
-                    ]]
-                }
+                "audio_file_id": music.file_id,
+                "input_message_content": {"message_text": f"🎵 {music.title}\n🔗 {music.youtube_url}"}, 
             })
     return inline_query_id, results
 

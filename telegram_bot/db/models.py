@@ -16,7 +16,8 @@ class User(Model):
 
 class Music(Model):
     id = fields.IntField(primary_key=True)
-    music_id = fields.CharField(max_length=100, unique=True)  
+    music_id = fields.CharField(max_length=100, unique=True) 
+    file_id = fields.CharField(max_length=255, null=True) 
     title = fields.CharField(max_length=255)
     duration = fields.IntField()
     youtube_url = fields.CharField(max_length=255)

@@ -5,6 +5,7 @@ from ..bot import TELEGRAM_TOKEN
 import json
 from telegram_bot.db.models import Music, SearchLog
 import logging
+import os
 
 async def search_music(query):
     existing_log = await SearchLog.get_or_none(query=query)
@@ -49,7 +50,6 @@ async def search_music(query):
     return []
 
 async def download_music(music_id):
-    import os
     os.makedirs("music", exist_ok=True)
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -121,6 +121,13 @@ async def send_music(chat_id, music_data):
                 response = await client.post(URL, files=files, data=data)
                 response.raise_for_status()
                 response_data = response.json()
+
+                # Getting the file_id from telegram
+                file_id = response_data['result']['audio']['file_id']
+
+                #Save in database
+                await Music.filter(music_id=music_data['music_id']).update(file_id=file_id)
+                
                 logging.info(f"✅ Music sent to chat_id={chat_id}")
                 logging.info(f"{response_data}")
                 return True
