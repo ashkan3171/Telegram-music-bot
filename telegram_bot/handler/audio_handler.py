@@ -4,7 +4,6 @@ import logging
 from ..bot import TELEGRAM_TOKEN
 import json
 from telegram_bot.db.models import Music, SearchLog
-import os
 import logging
 
 async def search_music(query):
@@ -27,9 +26,9 @@ async def search_music(query):
             info = ydl.extract_info(search_url, download=False)
             entries = info.get('entries', [])
             for idx, entry in enumerate(entries):
-                duration_sec = entry.get('duration', 0)
-                duration_minute = duration_sec // 60
-                duration_second = duration_sec % 60
+                duration = entry.get('duration', 0)
+                duration_minute = duration // 60
+                duration_second = duration % 60
                 duration_format = f"{duration_minute}:{duration_second:02d}"
                 result = {
                     'idx': idx,
