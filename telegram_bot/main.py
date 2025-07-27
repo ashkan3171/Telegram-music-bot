@@ -43,6 +43,9 @@ async def telegram_webhook(req: Request):
             text = data['message'].get('text', '')
             safe_text = escape(text)
 
+            if 'via_bot' in data['message']:
+                return
+
             if '/start' in safe_text:
                 chat_id = data['message']['chat']['id']
                 from_user = data['message']['from']
@@ -182,8 +185,6 @@ async def telegram_webhook(req: Request):
             # Show Playlist
             await playlist_inline_query(inline_query_id, results)
 
-        elif data['message']['from'].get('is_bot', False):
-            return 
 
     except Exception as e:
         logging.exception(f'There was an error: {e}')
