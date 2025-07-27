@@ -7,7 +7,7 @@ async def send_choices(chat_id, founded_music):
     inline_keyboard = []
     for music in founded_music:
         button = {
-            'text': f"{music['idx']+1} | {music['title'][:40]} ⏱ {music['duration']}",
+            'text': f"{music['idx']+1} | {music['title'][:40]} ⏱ {music['duration_str']}",
             'callback_data': f"{music['music_id']}"
         }
         inline_keyboard.append([button])

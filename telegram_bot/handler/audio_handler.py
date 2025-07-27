@@ -34,7 +34,8 @@ async def search_music(query):
                     'idx': idx,
                     'music_id': entry.get('id', ''),
                     'title': entry.get('title', ''),
-                    'duration': duration_format,     
+                    'duration': duration,
+                    'duration_str': duration_format,    
                     'youtube_url': entry.get('webpage_url', ''),
                     'uploader': entry.get('uploader')
                 }
